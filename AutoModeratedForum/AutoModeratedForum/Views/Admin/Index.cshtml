@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@model List<IdentityUser>
+
+<h2>Users</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            var roles = await UserManager.GetRolesAsync(user); 
+            <tr>
+                <td>@user.Email</td>
+                <td>@string.Join(", ", roles)</td>
+                <td>
+                    <form method="post" asp-action="AddRole">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role">
+                            <option>User</option>
+                            <option>Moderator</option>
+                            <option>Admin</option>
+                        </select>
+                        <button type="submit">Add</button>
+                    </form>
+
+                    <form method="post" asp-action="RemoveRole">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="role">
+                            <option>User</option>
+                            <option>Moderator</option>
+                            <option>Admin</option>
+                        </select>
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
