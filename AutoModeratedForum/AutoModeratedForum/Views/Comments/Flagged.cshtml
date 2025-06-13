@@ -1,0 +1,73 @@
+﻿@model IEnumerable<Comment>
+@using AutoModeratedForum.Entities
+
+<h2>Flagged comments for moderation</h2>
+
+@if (!Model.Any())
+{
+    <p>There are currently no flagged comments.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Comment</th>
+                <th>Data</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var comment in Model)
+            {
+                <tr data-id="@comment.Id">
+                    <td>@comment.Content</td>
+                    <td>@comment.CreatedAt.ToLocalTime()</td>
+                    <td>
+                        <button class="approve-btn">Approve</button>
+                        <button class="delete-btn">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    <script>
+        async function approveComment(id) {
+            const response = await fetch(`/api/comments/${id}/approve`, { method: 'POST' });
+            if (response.ok) {
+                alert('Comment approved.');
+                location.reload();
+            } else {
+                alert('Approval error.');
+            }
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+            const response = await fetch(`/api/comments/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                alert('Comment deleted.');
+                location.reload();
+            } else {
+                alert('Error deleting.');
+            }
+        }
+
+        document.querySelectorAll('.approve-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.closest('tr').getAttribute('data-id');
+                approveComment(id);
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.closest('tr').getAttribute('data-id');
+                deleteComment(id);
+            });
+        });
+    </script>
+}
