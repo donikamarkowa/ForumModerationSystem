@@ -39,7 +39,7 @@ public class CommentsController : Controller
             Content = content,
             UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
             CreatedAt = DateTime.UtcNow,
-            IsFlagged = prediction.IsToxic
+            IsFlagged = prediction.isRude
         };
 
         _context.Comments.Add(comment);

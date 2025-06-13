@@ -1,19 +1,14 @@
 ﻿using Microsoft.ML;
-using Microsoft.ML.Data;
 
 public class CommentInput
 {
-    [LoadColumn(0)]
     public string Text { get; set; }
-
-    [LoadColumn(1)]
     public bool Label { get; set; }
 }
 
 public class CommentPrediction
 {
-    [ColumnName("PredictedLabel")]
-    public bool PredictedLabel { get; set; }
+    public bool isRude { get; set; }
 
     public float Probability { get; set; }
     public float Score { get; set; }
