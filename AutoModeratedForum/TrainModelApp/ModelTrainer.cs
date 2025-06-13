@@ -26,7 +26,7 @@ public class ModelTrainer
         var mlContext = new MLContext();
 
         var data = mlContext.Data.LoadFromTextFile<CommentInput>(
-            dataPath, hasHeader: true, separatorChar: ',', allowQuoting: true);  // <-- добави allowQuoting тук
+            dataPath, hasHeader: true, separatorChar: ',', allowQuoting: true);  
 
         var split = mlContext.Data.TrainTestSplit(data, testFraction: 0.2);
 
