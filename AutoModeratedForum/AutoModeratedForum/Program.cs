@@ -1,8 +1,10 @@
 using AutoModeratedForum.Data;
+using AutoModeratedForum.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ML;
 
 namespace AutoModeratedForum
 {
@@ -28,6 +30,13 @@ namespace AutoModeratedForum
             .AddDefaultTokenProviders();
 
             builder.Services.AddTransient<IEmailSender, DummyEmailSender>();
+
+            builder.Services.AddSingleton<SentimentAnalysisService>(serviceProvider =>
+            {
+                var mlContext = new MLContext();
+                var modelPath = @"C:\programming\ForumModerationSystem\AutoModeratedForum\TrainModelApp\bin\Debug\net8.0\nas-bert-model.zip";
+                return new SentimentAnalysisService(mlContext, modelPath);
+            });
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
