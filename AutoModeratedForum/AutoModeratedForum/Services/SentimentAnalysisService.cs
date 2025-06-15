@@ -1,6 +1,5 @@
 ﻿using AutoModeratedForum.MLModels;
 using Microsoft.ML;
-using System.IO;
 
 namespace AutoModeratedForum.Services
 {
@@ -20,7 +19,11 @@ namespace AutoModeratedForum.Services
         public CommentPrediction Predict(string commentText)
         {
             var input = new CommentInput { Text = commentText };
-            return _predictionEngine.Predict(input);
+            var prediction = _predictionEngine.Predict(input);
+
+            prediction.isRude = prediction.PredictedLabel;
+
+            return prediction;
         }
     }
 }
