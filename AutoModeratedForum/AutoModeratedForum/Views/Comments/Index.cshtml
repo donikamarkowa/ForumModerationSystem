@@ -3,20 +3,30 @@
 
 <h2>Comments</h2>
 
-<div id="comments-list">
+<div id="comments-list" class="mb-4">
     @foreach (var comment in Model)
     {
-        <div class="comment">
-            <p>@comment.Content</p>
-            <small>Added on @comment.CreatedAt.ToLocalTime()</small>
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">@comment.Content</p>
+                <footer class="blockquote-footer text-muted">
+                    Added on @comment.CreatedAt.ToLocalTime().ToString("g")
+                </footer>
+            </div>
         </div>
     }
 </div>
 
-<hr />
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <hr />
 
-<h3>Add comment</h3>
-<form method="post" asp-controller="Comments" asp-action="AddComment">
-    <textarea name="content" required></textarea><br />
-    <button type="submit">Add</button>
-</form>
+    <h3>Add comment</h3>
+    <form method="post" asp-controller="Comments" asp-action="AddComment" class="mb-5">
+        <div class="mb-3">
+            <label for="content" class="form-label">Your comment</label>
+            <textarea id="content" name="content" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+}

@@ -1,36 +1,49 @@
 ﻿@model IEnumerable<AutoModeratedForum.Entities.ModerationRequest>
 @using AutoModeratedForum.Enums
 
-<h2>Reviewed Moderation Requests</h2>
+<h2 class="mb-4">Reviewed Moderation Requests</h2>
 
 @if (!Model.Any())
 {
-    <p style="color: gray; font-style: italic;">No reviewed moderation requests found.</p>
+    <div class="alert alert-secondary" role="alert" style="font-style: italic;">
+        No reviewed moderation requests found.
+    </div>
 }
 else
 {
-    <div id="reviewed-moderation-requests">
+    <div id="reviewed-moderation-requests" class="row gy-3">
         @foreach (var request in Model)
         {
             var comment = request.Comment;
-            <div class="comment reviewed-comment" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                <p><strong>Comment:</strong> @comment.Content</p>
-                <small><strong>Created at:</strong> @comment.CreatedAt.ToLocalTime()</small><br />
-                <small><strong>Reviewed at:</strong> @request.ReviewedAt?.ToLocalTime()</small><br />
-                <small><strong>Moderator:</strong> @request.Moderator!.Email</small><br />
-                <small>
-                    <strong>Status:</strong> @(
-            request.Decision == ModerationDecision.Approved ? "Approved" :
-            request.Decision == ModerationDecision.Rejected ? "Rejected" :
-            "Pending"
-            )
-                </small><br />
-                @if (!string.IsNullOrEmpty(request.Notes))
-                {
-                    <small><strong>Notes:</strong> @request.Notes</small>
+            var statusBadge = request.Decision switch
+            {
+                ModerationDecision.Approved => ("Approved", "success"),
+                ModerationDecision.Rejected => ("Rejected", "danger"),
+                _ => ("Pending", "warning")
+            };
 
-                    <br />
-                }
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <p class="card-text flex-grow-1"><strong>Comment:</strong> @comment.Content</p>
+                        <ul class="list-unstyled mb-2">
+                            <li><small><strong>Created at:</strong> @comment.CreatedAt.ToLocalTime().ToString("g")</small></li>
+                            <li><small><strong>Reviewed at:</strong> @(request.ReviewedAt?.ToLocalTime().ToString("g") ?? "N/A")</small></li>
+                            <li><small><strong>Moderator:</strong> @request.Moderator?.Email ?? "Unknown"</small></li>
+                            <li>
+                                <strong>Status:</strong>
+                                <span class="badge bg-@statusBadge.Item2">@statusBadge.Item1</span>
+                            </li>
+                        </ul>
+
+                        @if (!string.IsNullOrEmpty(request.Notes))
+                        {
+                            <div class="alert alert-info py-2" role="alert" style="font-size: 0.9rem;">
+                                <strong>Notes:</strong> @request.Notes
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
         }
     </div>

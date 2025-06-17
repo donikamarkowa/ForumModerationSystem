@@ -4,7 +4,7 @@
 
 <h2>Users</h2>
 
-<table>
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Email</th>
@@ -15,29 +15,24 @@
     <tbody>
         @foreach (var user in Model)
         {
-            var roles = await UserManager.GetRolesAsync(user); 
+            var roles = await UserManager.GetRolesAsync(user);
             <tr>
                 <td>@user.Email</td>
                 <td>@string.Join(", ", roles)</td>
                 <td>
-                    <form method="post" asp-action="AddRole">
+                    <form method="post" asp-action="AddRole" class="d-inline">
                         <input type="hidden" name="userId" value="@user.Id" />
-                        <select name="role">
+                        <select name="role" class="form-select form-select-sm w-auto d-inline-block me-2" style="width: 130px;" aria-label="Select role">
                             <option>User</option>
                             <option>Moderator</option>
                             <option>Admin</option>
                         </select>
-                        <button type="submit">Add</button>
+                        <button type="submit" class="btn btn-sm btn-primary me-2">Add</button>
                     </form>
 
-                    <form method="post" asp-action="RemoveRole">
+                    <form method="post" asp-action="RemoveRole" class="d-inline">
                         <input type="hidden" name="userId" value="@user.Id" />
-                        <select name="role">
-                            <option>User</option>
-                            <option>Moderator</option>
-                            <option>Admin</option>
-                        </select>
-                        <button type="submit">Remove</button>
+                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
                     </form>
                 </td>
             </tr>
