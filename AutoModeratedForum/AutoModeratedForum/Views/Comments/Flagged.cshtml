@@ -1,73 +1,38 @@
-﻿@model IEnumerable<Comment>
-@using AutoModeratedForum.Entities
+﻿@model IEnumerable<AutoModeratedForum.Entities.ModerationRequest>
+@using AutoModeratedForum.Enums
 
-<h2>Flagged comments for moderation</h2>
+<h2>Flagged Comments for Moderation</h2>
 
 @if (!Model.Any())
 {
-    <p>There are currently no flagged comments.</p>
+    <p style="color: gray; font-style: italic;">There are no flagged comments to review at the moment.</p>
 }
 else
 {
-    <table>
-        <thead>
-            <tr>
-                <th>Comment</th>
-                <th>Data</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var comment in Model)
-            {
-                <tr data-id="@comment.Id">
-                    <td>@comment.Content</td>
-                    <td>@comment.CreatedAt.ToLocalTime()</td>
-                    <td>
-                        <button class="approve-btn">Approve</button>
-                        <button class="delete-btn">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+    <div id="flagged-comments-list">
+        @foreach (var request in Model)
+        {
+            var comment = request.Comment;
+            <div class="comment flagged-comment" style="border: 1px solid #f00; padding: 10px; margin-bottom: 10px;">
+                <p>@comment.Content</p>
+                <small>Added on @comment.CreatedAt.ToLocalTime()</small>
+                <br />
+                <small>
+                    <strong>Status:</strong> @(
+                        request.Decision == ModerationDecision.Pending ? "Pending review" :
+                        request.Decision == ModerationDecision.Approved ? "Approved" : "Rejected"
+                    )
+                </small>
 
-@section Scripts {
-    <script>
-        async function approveComment(id) {
-            const response = await fetch(`/api/comments/${id}/approve`, { method: 'POST' });
-            if (response.ok) {
-                alert('Comment approved.');
-                location.reload();
-            } else {
-                alert('Approval error.');
-            }
+                @if (request.Decision == ModerationDecision.Pending)
+                {
+                    <form method="post" asp-controller="Comments" asp-action="ModerateComment" style="margin-top:10px;">
+                        <input type="hidden" name="moderationRequestId" value="@request.Id" />
+                        <button type="submit" name="decision" value="Approved" class="btn btn-success">Approve</button>
+                        <button type="submit" name="decision" value="Rejected" class="btn btn-danger">Reject</button>
+                    </form>
+                }
+            </div>
         }
-
-        async function deleteComment(id) {
-            if (!confirm('Are you sure you want to delete this comment?')) return;
-            const response = await fetch(`/api/comments/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                alert('Comment deleted.');
-                location.reload();
-            } else {
-                alert('Error deleting.');
-            }
-        }
-
-        document.querySelectorAll('.approve-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.closest('tr').getAttribute('data-id');
-                approveComment(id);
-            });
-        });
-
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.closest('tr').getAttribute('data-id');
-                deleteComment(id);
-            });
-        });
-    </script>
+    </div>
 }
