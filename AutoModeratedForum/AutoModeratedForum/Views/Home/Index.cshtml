@@ -1,8 +1,47 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Auto Moderated Forum";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="vh-100 d-flex align-items-center bg-light flex-column justify-content-center">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">
+            Welcome to Auto Moderated Forum
+        </h1>
+        <p class="lead mb-4 text-muted animate__animated animate__fadeInUp animate__delay-1s">
+            Join the conversation. Share your thoughts. Help moderate the community.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap animate__animated animate__zoomIn animate__delay-2s mb-5">
+            <a asp-controller="Comments" asp-action="Index" class="btn btn-primary btn-lg">
+                Browse Comments
+            </a>
+        </div>
+    </div>
+
+    <section class="container mt-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp animate__delay-3s">
+                <i class="bi bi-people-fill fs-1 text-primary mb-3"></i>
+                <h4>Community Driven</h4>
+                <p>Engage with a welcoming community focused on respectful and meaningful discussions.</p>
+            </div>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp animate__delay-4s">
+                <i class="bi bi-shield-lock-fill fs-1 text-primary mb-3"></i>
+                <h4>Safe Environment</h4>
+                <p>Automated moderation helps maintain a positive and safe space for everyone.</p>
+            </div>
+            <div class="col-md-4 mb-4 animate__animated animate__fadeInUp animate__delay-5s">
+                <i class="bi bi-lightning-fill fs-1 text-primary mb-3"></i>
+                <h4>Real-Time Updates</h4>
+                <p>Stay up to date with live conversations and instant feedback.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container mt-5">
+        <blockquote class="blockquote text-center fst-italic animate__animated animate__fadeIn animate__delay-6s">
+            <p>"The strength of the community lies in the voice of its members."</p>
+            <footer class="blockquote-footer">Auto Moderated Forum Team</footer>
+        </blockquote>
+    </section>
+</section>
