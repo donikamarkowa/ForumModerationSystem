@@ -1,0 +1,37 @@
+﻿@model IEnumerable<AutoModeratedForum.Entities.ModerationRequest>
+@using AutoModeratedForum.Enums
+
+<h2>Reviewed Moderation Requests</h2>
+
+@if (!Model.Any())
+{
+    <p style="color: gray; font-style: italic;">No reviewed moderation requests found.</p>
+}
+else
+{
+    <div id="reviewed-moderation-requests">
+        @foreach (var request in Model)
+        {
+            var comment = request.Comment;
+            <div class="comment reviewed-comment" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                <p><strong>Comment:</strong> @comment.Content</p>
+                <small><strong>Created at:</strong> @comment.CreatedAt.ToLocalTime()</small><br />
+                <small><strong>Reviewed at:</strong> @request.ReviewedAt?.ToLocalTime()</small><br />
+                <small><strong>Moderator:</strong> @request.Moderator!.Email</small><br />
+                <small>
+                    <strong>Status:</strong> @(
+            request.Decision == ModerationDecision.Approved ? "Approved" :
+            request.Decision == ModerationDecision.Rejected ? "Rejected" :
+            "Pending"
+            )
+                </small><br />
+                @if (!string.IsNullOrEmpty(request.Notes))
+                {
+                    <small><strong>Notes:</strong> @request.Notes</small>
+
+                    <br />
+                }
+            </div>
+        }
+    </div>
+}
