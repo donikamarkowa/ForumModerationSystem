@@ -33,7 +33,6 @@ public class CommentsController : Controller
     public async Task<IActionResult> AddComment(string content)
     {
         var prediction = _sentimentService.Predict(content);
-
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         var comment = new Comment
@@ -87,6 +86,19 @@ public class CommentsController : Controller
     }
 
     [Authorize(Roles = "Moderator")]
+    [HttpGet]
+    public async Task<IActionResult> Reviewed()
+    {
+        var reviewedRequests = await _context.ModerationRequests
+            .Include(r => r.Comment)
+            .Include(r => r.Moderator)
+            .Where(r => r.Decision != ModerationDecision.Pending)
+            .OrderByDescending(r => r.ReviewedAt)
+            .ToListAsync();
+
+        return View(reviewedRequests);
+    }
+    [Authorize(Roles = "Moderator")]
     [HttpPost]
     public async Task<IActionResult> ApproveComment(int id)
     {
@@ -125,7 +137,8 @@ public class CommentsController : Controller
         request.ModeratorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         request.ReviewedAt = DateTime.UtcNow;
 
-        _context.Comments.Remove(comment);
+        comment.IsFlagged = true;
+
         await _context.SaveChangesAsync();
 
         return NoContent();
@@ -133,7 +146,7 @@ public class CommentsController : Controller
 
     [Authorize(Roles = "Moderator")]
     [HttpPost]
-    public async Task<IActionResult> ModerateComment(int moderationRequestId, string decision)
+    public async Task<IActionResult> ModerateComment(int moderationRequestId, string decision, string? notes)
     {
         var request = await _context.ModerationRequests
             .Include(r => r.Comment)
@@ -145,6 +158,7 @@ public class CommentsController : Controller
         var moderatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         request.ReviewedAt = DateTime.UtcNow;
         request.ModeratorId = moderatorId;
+        request.Notes = notes;
 
         if (decision == "Approved")
         {
@@ -154,11 +168,10 @@ public class CommentsController : Controller
         else if (decision == "Rejected")
         {
             request.Decision = ModerationDecision.Rejected;
-            _context.Comments.Remove(request.Comment); 
+            request.Comment.IsFlagged = true; 
         }
 
         await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Flagged)); 
+        return RedirectToAction(nameof(Flagged));
     }
-
 }
