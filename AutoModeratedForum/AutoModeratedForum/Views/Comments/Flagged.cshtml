@@ -28,10 +28,17 @@ else
                 {
                     <form method="post" asp-controller="Comments" asp-action="ModerateComment" style="margin-top:10px;">
                         <input type="hidden" name="moderationRequestId" value="@request.Id" />
+
+                        <div class="form-group mb-2">
+                            <label for="notes-@request.Id">Moderator Notes (optional):</label>
+                            <textarea name="notes" id="notes-@request.Id" class="form-control" rows="2" placeholder="Add notes..."></textarea>
+                        </div>
+
                         <button type="submit" name="decision" value="Approved" class="btn btn-success">Approve</button>
                         <button type="submit" name="decision" value="Rejected" class="btn btn-danger">Reject</button>
                     </form>
                 }
+
             </div>
         }
     </div>
