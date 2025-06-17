@@ -29,6 +29,20 @@ public class CommentsController : Controller
     }
 
     [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> UserComments()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var comments = await _context.Comments
+           .Where(c => c.UserId == userId)
+           .Include(c => c.ModerationRequest)
+           .ToListAsync();
+
+        return View(comments);
+    }
+
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> AddComment(string content)
     {
