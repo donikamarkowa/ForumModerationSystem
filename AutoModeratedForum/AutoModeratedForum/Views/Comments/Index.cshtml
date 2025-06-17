@@ -3,6 +3,18 @@
 
 <h2>Comments</h2>
 
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <h3>Add comment</h3>
+    <form method="post" asp-controller="Comments" asp-action="AddComment" class="mb-5">
+        <div class="mb-3">
+            <label for="content" class="form-label">Your comment</label>
+            <textarea id="content" name="content" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+}
+
 <div id="comments-list" class="mb-4">
     @foreach (var comment in Model)
     {
@@ -16,17 +28,3 @@
         </div>
     }
 </div>
-
-@if (User.Identity?.IsAuthenticated ?? false)
-{
-    <hr />
-
-    <h3>Add comment</h3>
-    <form method="post" asp-controller="Comments" asp-action="AddComment" class="mb-5">
-        <div class="mb-3">
-            <label for="content" class="form-label">Your comment</label>
-            <textarea id="content" name="content" class="form-control" rows="4" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Add</button>
-    </form>
-}
