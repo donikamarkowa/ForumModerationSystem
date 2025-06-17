@@ -19,9 +19,9 @@ else
                 <br />
                 <small>
                     <strong>Status:</strong> @(
-                        request.Decision == ModerationDecision.Pending ? "Pending review" :
-                        request.Decision == ModerationDecision.Approved ? "Approved" : "Rejected"
-                    )
+            request.Decision == ModerationDecision.Pending ? "Pending review" :
+            request.Decision == ModerationDecision.Approved ? "Approved" : "Rejected"
+            )
                 </small>
 
                 @if (request.Decision == ModerationDecision.Pending)
@@ -43,3 +43,11 @@ else
         }
     </div>
 }
+
+<style>
+    textarea.form-control:focus {
+        outline: none;
+        box-shadow: none;
+        border-color: #ccc;
+    }
+</style>
