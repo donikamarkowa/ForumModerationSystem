@@ -1,25 +1,25 @@
 ﻿using AutoModeratedForum.Data;
 using AutoModeratedForum.Entities;
-using AutoModeratedForum.Models;
+using AutoModeratedForum.Enums;
 using AutoModeratedForum.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 [Route("[controller]/[action]")]
 public class CommentsController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly SentimentAnalysisService _sentimentService;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public CommentsController(ApplicationDbContext context, SentimentAnalysisService sentimentService)
+    public CommentsController(ApplicationDbContext context, SentimentAnalysisService sentimentService, UserManager<IdentityUser> userManager)
     {
         _context = context;
         _sentimentService = sentimentService;
+        _userManager = userManager;
     }
 
     [HttpGet]
@@ -34,16 +34,30 @@ public class CommentsController : Controller
     {
         var prediction = _sentimentService.Predict(content);
 
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
         var comment = new Comment
         {
             Content = content,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!,
+            UserId = userId,
             CreatedAt = DateTime.UtcNow,
             IsFlagged = prediction.isRude
         };
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
+
+        if (comment.IsFlagged)
+        {
+            var moderationRequest = new ModerationRequest
+            {
+                CommentId = comment.Id,
+                Decision = ModerationDecision.Pending
+            };
+
+            _context.ModerationRequests.Add(moderationRequest);
+            await _context.SaveChangesAsync();
+        }
 
         return RedirectToAction("Index");
     }
@@ -61,41 +75,90 @@ public class CommentsController : Controller
 
     [Authorize(Roles = "Moderator")]
     [HttpGet]
-    public async Task<IActionResult> GetFlaggedComments()
+    public async Task<IActionResult> Flagged()
     {
-        var flaggedComments = await _context.Comments
-            .Where(c => c.IsFlagged)
-            .OrderByDescending(c => c.CreatedAt)
+        var flagged = await _context.ModerationRequests
+            .Include(r => r.Comment)
+            .Where(r => r.Decision == ModerationDecision.Pending)
+            .OrderBy(r => r.Comment.CreatedAt)
             .ToListAsync();
 
-        return Ok(flaggedComments);
+        return View(flagged);
     }
 
     [Authorize(Roles = "Moderator")]
-    [HttpPost("{id}/approve")]
+    [HttpPost]
     public async Task<IActionResult> ApproveComment(int id)
     {
-        var comment = await _context.Comments.FindAsync(id);
-        if (comment == null)
+        var request = await _context.ModerationRequests
+            .Include(r => r.Comment)
+            .FirstOrDefaultAsync(r => r.CommentId == id && r.Decision == ModerationDecision.Pending);
+
+        if (request == null)
             return NotFound();
 
-        comment.IsFlagged = false;
+        request.Decision = ModerationDecision.Approved;
+        request.ModeratorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        request.ReviewedAt = DateTime.UtcNow;
+
+        request.Comment.IsFlagged = false;
+
         await _context.SaveChangesAsync();
 
-        return Ok(comment);
+        return Ok(request.Comment);
     }
 
     [Authorize(Roles = "Moderator")]
-    [HttpDelete("{id}")]
+    [HttpDelete]
     public async Task<IActionResult> DeleteComment(int id)
     {
-        var comment = await _context.Comments.FindAsync(id);
-        if (comment == null)
+        var request = await _context.ModerationRequests
+            .Include(r => r.Comment)
+            .FirstOrDefaultAsync(r => r.CommentId == id && r.Decision == ModerationDecision.Pending);
+
+        if (request == null)
             return NotFound();
+
+        var comment = request.Comment;
+
+        request.Decision = ModerationDecision.Rejected;
+        request.ModeratorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        request.ReviewedAt = DateTime.UtcNow;
 
         _context.Comments.Remove(comment);
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
+
+    [Authorize(Roles = "Moderator")]
+    [HttpPost]
+    public async Task<IActionResult> ModerateComment(int moderationRequestId, string decision)
+    {
+        var request = await _context.ModerationRequests
+            .Include(r => r.Comment)
+            .FirstOrDefaultAsync(r => r.Id == moderationRequestId);
+
+        if (request == null)
+            return NotFound();
+
+        var moderatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        request.ReviewedAt = DateTime.UtcNow;
+        request.ModeratorId = moderatorId;
+
+        if (decision == "Approved")
+        {
+            request.Decision = ModerationDecision.Approved;
+            request.Comment.IsFlagged = false;
+        }
+        else if (decision == "Rejected")
+        {
+            request.Decision = ModerationDecision.Rejected;
+            _context.Comments.Remove(request.Comment); 
+        }
+
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Flagged)); 
+    }
+
 }
