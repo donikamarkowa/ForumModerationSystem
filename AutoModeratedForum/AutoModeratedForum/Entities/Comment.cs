@@ -23,5 +23,6 @@ namespace AutoModeratedForum.Entities
         public bool IsApproved { get; set; } = false;
 
         public bool IsFlagged { get; set; } = false;
+        public virtual ModerationRequest? ModerationRequest { get; set; }
     }
 }

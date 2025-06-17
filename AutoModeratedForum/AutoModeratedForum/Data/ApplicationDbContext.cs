@@ -35,6 +35,11 @@ namespace AutoModeratedForum.Data
                 .WithMany()
                 .HasForeignKey(m => m.ModeratorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Comment>()
+               .HasOne(c => c.ModerationRequest)
+               .WithOne(mr => mr.Comment)
+               .HasForeignKey<ModerationRequest>(mr => mr.CommentId);
         }
     }
 }
