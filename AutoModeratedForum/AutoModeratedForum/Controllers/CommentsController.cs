@@ -70,6 +70,7 @@ public class CommentsController : Controller
         var comments = await _context.Comments
            .Where(c => c.UserId == userId)
            .Include(c => c.ModerationRequest)
+           .OrderByDescending(c => c.CreatedAt)
            .ToListAsync();
 
         return View(comments);
@@ -114,6 +115,7 @@ public class CommentsController : Controller
 
         return View(reviewedRequests);
     }
+
     [Authorize(Roles = "Moderator")]
     [HttpPost]
     public async Task<IActionResult> ApproveComment(int id)
