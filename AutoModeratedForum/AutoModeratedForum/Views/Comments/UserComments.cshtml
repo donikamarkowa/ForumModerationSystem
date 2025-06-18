@@ -5,12 +5,12 @@
 
 @if (!Model.Any())
 {
-    <p>You have not posted any comments yet.</p>
+    <p class="text-muted fst-italic">You have not posted any comments yet.</p>
 }
 else
 {
-    <table class="table">
-        <thead>
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
             <tr>
                 <th>Content</th>
                 <th>Created At</th>
@@ -19,30 +19,55 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var comment in Model)
+            @foreach (var comment in Model.OrderByDescending(c => c.CreatedAt))
             {
                 string statusText;
+                string statusClass;
 
                 if (comment.ModerationRequest == null)
                 {
                     statusText = "Approved";
+                    statusClass = "badge bg-success";
                 }
                 else
                 {
-                    statusText = comment.ModerationRequest.Decision switch
+                    switch (comment.ModerationRequest.Decision)
                     {
-                        ModerationDecision.Pending => "Pending",
-                        ModerationDecision.Approved => "Approved",
-                        ModerationDecision.Rejected => "Rejected",
-                        _ => "Unknown"
-                    };
+                        case ModerationDecision.Pending:
+                            statusText = "Pending";
+                            statusClass = "badge bg-warning text-dark";
+                            break;
+                        case ModerationDecision.Approved:
+                            statusText = "Approved";
+                            statusClass = "badge bg-success";
+                            break;
+                        case ModerationDecision.Rejected:
+                            statusText = "Rejected";
+                            statusClass = "badge bg-danger";
+                            break;
+                        default:
+                            statusText = "Unknown";
+                            statusClass = "badge bg-secondary";
+                            break;
+                    }
                 }
 
                 <tr>
-                    <td>@comment.Content</td>
-                    <td>@comment.CreatedAt.ToLocalTime()</td>
-                    <td>@statusText</td>
-                    <td>@(string.IsNullOrWhiteSpace(comment.ModerationRequest?.Notes) ? "-" : comment.ModerationRequest!.Notes)</td>
+                    <td style="max-width: 400px; word-wrap: break-word;">@comment.Content</td>
+                    <td>@comment.CreatedAt.ToLocalTime().ToString("g")</td>
+                    <td><span class="@statusClass">@statusText</span></td>
+                    <td>
+                        @if (string.IsNullOrWhiteSpace(comment.ModerationRequest?.Notes))
+                        {
+                            <span class="text-muted fst-italic">No notes</span>
+                        }
+                        else
+                        {
+                            <span class="text-truncate" style="max-width: 250px;" title="@comment.ModerationRequest!.Notes">
+                                @comment.ModerationRequest!.Notes
+                            </span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
