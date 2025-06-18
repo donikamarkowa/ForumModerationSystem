@@ -1,8 +1,12 @@
 ﻿using Microsoft.ML;
+using Microsoft.ML.Data;
 
 public class CommentInput
 {
+    [LoadColumn(0)]
     public string Text { get; set; } = null!;
+
+    [LoadColumn(1)]
     public bool Label { get; set; }
 }
 
