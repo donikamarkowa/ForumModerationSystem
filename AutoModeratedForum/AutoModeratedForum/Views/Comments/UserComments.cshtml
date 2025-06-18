@@ -21,11 +21,27 @@ else
         <tbody>
             @foreach (var comment in Model)
             {
-                var decision = comment.ModerationRequest?.Decision ?? ModerationDecision.Pending;
+                string statusText;
+
+                if (comment.ModerationRequest == null)
+                {
+                    statusText = "Approved";
+                }
+                else
+                {
+                    statusText = comment.ModerationRequest.Decision switch
+                    {
+                        ModerationDecision.Pending => "Pending",
+                        ModerationDecision.Approved => "Approved",
+                        ModerationDecision.Rejected => "Rejected",
+                        _ => "Unknown"
+                    };
+                }
+
                 <tr>
                     <td>@comment.Content</td>
                     <td>@comment.CreatedAt.ToLocalTime()</td>
-                    <td>@decision.ToString()</td>
+                    <td>@statusText</td>
                     <td>@(string.IsNullOrWhiteSpace(comment.ModerationRequest?.Notes) ? "-" : comment.ModerationRequest!.Notes)</td>
                 </tr>
             }
