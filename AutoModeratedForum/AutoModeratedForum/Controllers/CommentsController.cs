@@ -80,9 +80,10 @@ public class CommentsController : Controller
     public async Task<IActionResult> Index()
     {
         var comments = await _context.Comments
-            .Where(c => !c.IsFlagged)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+         .Where(c => !c.IsFlagged ||
+             c.ModerationRequest != null && c.ModerationRequest.Decision == ModerationDecision.Approved)
+         .OrderByDescending(c => c.CreatedAt)
+         .ToListAsync();
 
         return View(comments);
     }
