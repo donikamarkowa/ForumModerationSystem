@@ -35,7 +35,7 @@ else
                         <ul class="list-unstyled mb-3 small text-muted" style="font-size: 0.85rem;">
                             <li><strong>Created at:</strong> @comment.CreatedAt.ToLocalTime().ToString("g")</li>
                             <li><strong>Reviewed at:</strong> @(request.ReviewedAt?.ToLocalTime().ToString("g") ?? "N/A")</li>
-                            <li><strong>Moderator:</strong> @request.Moderator?.Email ?? "Unknown"</li>
+                            <li><strong>Moderator:</strong> @request.Moderator?.Email"</li>
                             <li>
                                 <strong>Status:</strong>
                                 <span class="badge bg-@statusBadge.Item2">@statusBadge.Item1</span>
