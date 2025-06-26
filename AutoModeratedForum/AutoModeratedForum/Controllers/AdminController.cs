@@ -34,11 +34,17 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> RemoveRole(string userId, string role)
     {
+        if (string.IsNullOrWhiteSpace(role))
+        {
+            return BadRequest("Role cannot be null or empty.");
+        }
+
         var user = await userManager.FindByIdAsync(userId);
         if (user != null && await roleManager.RoleExistsAsync(role))
         {
             await userManager.RemoveFromRoleAsync(user, role);
         }
+
         return RedirectToAction("Index");
     }
 }

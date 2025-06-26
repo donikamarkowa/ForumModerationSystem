@@ -1,14 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject UserManager<IdentityUser> UserManager
 @model List<IdentityUser>
+
 @{
     ViewData["Title"] = "Users";
+
+    string GetBadgeClass(string role) => role switch
+    {
+        "Admin" => "bg-danger",
+        "Moderator" => "bg-warning text-dark",
+        "User" => "bg-primary",
+        _ => "bg-secondary"
+    };
 }
 
-<h2>Users</h2>
+<h2 class="mb-4">Users</h2>
 
-<table class="table table-striped">
-    <thead>
+<table class="table table-bordered align-middle">
+    <thead class="table-light">
         <tr>
             <th>Email</th>
             <th>Roles</th>
@@ -21,21 +30,39 @@
             var roles = await UserManager.GetRolesAsync(user);
             <tr>
                 <td>@user.Email</td>
-                <td>@string.Join(", ", roles)</td>
+
                 <td>
-                    <form method="post" asp-action="AddRole" class="d-inline">
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var role in roles)
+                        {
+                            <form method="post" asp-action="RemoveRole" class="d-inline">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <input type="hidden" name="role" value="@role" />
+                                <div class="badge @GetBadgeClass(role) d-flex align-items-center p-2">
+                                    <span>@role</span>
+                                    <button type="submit"
+                                            class="btn btn-sm btn-link text-white text-decoration-none ms-2 p-0"
+                                            style="line-height: 1"
+                                            title="Remove @role">
+                                        ✖
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                    </div>
+                </td>
+
+                <td>
+                    <form method="post" asp-action="AddRole" class="d-flex gap-2 align-items-center">
                         <input type="hidden" name="userId" value="@user.Id" />
-                        <select name="role" class="form-select form-select-sm w-auto d-inline-block me-2" style="width: 130px;" aria-label="Select role">
+                        <select name="role"
+                                class="form-select form-select-sm w-auto"
+                                aria-label="Select role to add">
                             <option>User</option>
                             <option>Moderator</option>
                             <option>Admin</option>
                         </select>
-                        <button type="submit" class="btn btn-sm btn-primary me-2">Add</button>
-                    </form>
-
-                    <form method="post" asp-action="RemoveRole" class="d-inline">
-                        <input type="hidden" name="userId" value="@user.Id" />
-                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                        <button type="submit" class="btn btn-sm btn-success">Add</button>
                     </form>
                 </td>
             </tr>
