@@ -1,18 +1,24 @@
 ﻿@using AutoModeratedForum.Entities
 @model IEnumerable<AutoModeratedForum.Entities.Comment>
+@{
+    ViewData["Title"] = "Comments";
+}
 
 <h2>Comments</h2>
 
 @if (User.Identity?.IsAuthenticated ?? false)
 {
-    <h3>Add comment</h3>
     <form method="post" asp-controller="Comments" asp-action="AddComment" class="mb-5">
         <div class="mb-3">
-            <label for="content" class="form-label">Your comment</label>
-            <textarea id="content" name="content" class="form-control" rows="4" required></textarea>
+            <label for="content" class="form-label">Write your comment here:</label>
+            <textarea id="content" name="content" class="form-control" rows="4" required placeholder="Type something..."></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="submit" class="btn btn-primary">Post Comment</button>
     </form>
+}
+else
+{
+    <p class="text-muted">You must be logged in to leave a comment.</p>
 }
 
 <div id="comments-list" class="mb-4">
@@ -22,7 +28,7 @@
             <div class="card-body">
                 <p class="card-text">@comment.Content</p>
                 <footer class="blockquote-footer text-muted">
-                    Added on @comment.CreatedAt.ToLocalTime().ToString("g")
+                    Posted on @comment.CreatedAt.ToLocalTime().ToString("g")
                 </footer>
             </div>
         </div>
